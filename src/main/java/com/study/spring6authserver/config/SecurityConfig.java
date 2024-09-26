@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +42,14 @@ import java.util.UUID;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    String issuer;
+    String port;
+
+    public SecurityConfig(@Value("${server.issuer}") String issuer, @Value("${server.port}") String port) {
+        this.issuer = issuer;
+        this.port = port;
+    }
 
     //A Spring Security filter chain for the Spring Actuator Endpoints.
     @Bean
@@ -161,6 +170,8 @@ public class SecurityConfig {
     //An instance of AuthorizationServerSettings to configure Spring Authorization Server.
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+        return AuthorizationServerSettings.builder()
+                .issuer(String.format("http://%s:%s", issuer, port))
+                .build();
     }
 }
